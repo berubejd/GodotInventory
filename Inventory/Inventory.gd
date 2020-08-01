@@ -15,6 +15,7 @@ func _ready():
 	pickup_item("one-half ring")
 	pickup_item("meat", false)
 
+
 func _process(_delta):
 	pass
 

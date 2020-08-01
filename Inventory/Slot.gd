@@ -2,11 +2,16 @@ extends Panel
 class_name Slot
 
 export(Inventory.SlotType) var slotType = Inventory.SlotType.SLOT_DEFAULT;
+export(Inventory.KeyBind) var keyBind = null
+export(Color) var clickColor = Color(1, 1, 1, 1)
 
 var item = null
+var orig_color = Color(0, 0, 0, 0)
 
 onready var bag = get_tree().get_root().find_node("Bag", true, false)
+onready var keylabel = $KeyLabel
 onready var typelabel = $TypeLabel
+onready var stylebox = get_stylebox("panel")
 
 func _ready():
 # warning-ignore:return_value_discarded
@@ -14,9 +19,17 @@ func _ready():
 # warning-ignore:return_value_discarded
 	connect("mouse_exited", self, "mouse_exit_slot")
 	
-	# Setup label
-	typelabel.text = Inventory.get_type(slotType).rsplit("_", true, 1)[0]
+	# Setup labels
+	typelabel.text = Inventory.get_type(slotType)
 	typelabel.visible = false
+	
+	if keyBind:
+		keylabel.text = Inventory.KeyBind.keys()[keyBind - 48 + 1].split("_", true)[1]
+	else:
+		keylabel.visible = false
+
+	# Save original border color
+	orig_color = stylebox.border_color
 
 
 func _process(_delta):
@@ -34,6 +47,16 @@ func _gui_input(event : InputEvent):
 				pass
 			else:
 				pass
+
+
+func _unhandled_key_input(event):
+	if event.scancode == keyBind:
+		if event.pressed and not event.is_echo():
+				stylebox.border_color = clickColor
+				if item and item.has_action:
+					item.click()
+		else:
+			stylebox.border_color = orig_color
 
 
 func add_item(new_item):

@@ -13,7 +13,9 @@ class_name Item
 #		"type": SlotType.SLOT_MAIN_HAND,
 #		"stackable": false,
 #		"stack_limit": 1,
-#		"description" : "This is a well-worn apprentice's wand."
+#		"description": "This is a well-worn apprentice's wand."
+#		"value": 10,
+#		"click": [ "shoot", [5, 1] ]
 #	},
 
 # Define item variables
@@ -24,6 +26,10 @@ var type_description: String = ""
 var stackable: bool = false
 var stack_limit: int = 1
 var description: String = ""
+var value: int = 0
+var has_action: bool = false
+var action: String = ""
+var action_params: Array = []
 
 # Define item manipulation variables
 var held: = false
@@ -46,10 +52,15 @@ func initialize(item_id):
 	stackable = temp_item["stackable"]
 	stack_limit = temp_item["stack_limit"]
 	description = temp_item["description"]
-	
+	value = temp_item["value"]
+	type_description = Inventory.get_type(type)
+
 	texture = load(icon)
 
-	type_description = Inventory.get_type(type)	
+	if temp_item["click"]:
+		has_action = true
+		action = temp_item["click"][0]
+		action_params = temp_item["click"][1]
 
 
 func _process(_delta):
@@ -117,6 +128,14 @@ func clear_item():
 	owner = null
 	return old_owner
 
+func click():
+	if has_action:
+		callv(action, action_params)
+
 
 func return_item():
 	rect_global_position = orig_icon_pos
+
+
+func action_eat(_params = null):
+	print("Nom nom!")
