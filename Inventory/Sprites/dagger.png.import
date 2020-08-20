@@ -2,15 +2,15 @@
 
 importer="texture"
 type="StreamTexture"
-path="res://.import/Item_40.png-a5b05e572884139faae8b30e19f2f181.stex"
+path="res://.import/dagger.png-973012602c00e4f6414f4cf69764812f.stex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Inventory/Sprites/Item_40.png"
-dest_files=[ "res://.import/Item_40.png-a5b05e572884139faae8b30e19f2f181.stex" ]
+source_file="res://Inventory/Sprites/dagger.png"
+dest_files=[ "res://.import/dagger.png-973012602c00e4f6414f4cf69764812f.stex" ]
 
 [params]
 

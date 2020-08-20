@@ -183,7 +183,9 @@ border_width_bottom = 1
 border_color = Color( 0.239216, 0.215686, 0.215686, 1 )
 anti_aliasing = false
 
-[node name="Inventory" type="Control"]
+[node name="Inventory" type="Control" groups=[
+"Backup",
+]]
 anchor_right = 1.0
 anchor_bottom = 1.0
 margin_left = 0.235977
@@ -209,7 +211,7 @@ __meta__ = {
 custom_styles/panel = SubResource( 1 )
 slotType = 6
 
-[node name="Off_Hand" parent="HotBar" instance=ExtResource( 5 )]
+[node name="Spell" parent="HotBar" instance=ExtResource( 5 )]
 margin_left = 19.0
 margin_right = 37.0
 custom_styles/panel = SubResource( 2 )
@@ -314,6 +316,7 @@ margin_bottom = 113.0
 custom_styles/panel = SubResource( 16 )
 
 [node name="Tooltip" parent="." instance=ExtResource( 2 )]
+mouse_filter = 1
 
 [node name="Recycle" type="TextureRect" parent="."]
 self_modulate = Color( 1, 1, 1, 0.6 )

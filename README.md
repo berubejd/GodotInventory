@@ -14,9 +14,9 @@ All resources in use by this project have been made freely available by their au
 
 ### Assets
 
-[16x16 RPG Item Pack by Alex's Assets](https://alexs-assets.itch.io/16x16-rpg-item-pack)
-[16x16 RPG Item Pack 2 by Alex's Assets](https://alexs-assets.itch.io/16x16-rpg-item-pack-2)
+ - [16x16 RPG Item Pack by Alex's Assets](https://alexs-assets.itch.io/16x16-rpg-item-pack)
+ - [16x16 RPG Item Pack 2 by Alex's Assets](https://alexs-assets.itch.io/16x16-rpg-item-pack-2)
 
 ### Font
 
-[Thaleah Fat by Tiny Worlds](https://tinyworlds.itch.io/free-pixel-font-thaleah)
+ - [Thaleah Fat by Tiny Worlds](https://tinyworlds.itch.io/free-pixel-font-thaleah)

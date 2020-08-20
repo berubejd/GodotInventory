@@ -8,7 +8,7 @@ enum SlotType {
 	SLOT_FEET,
 	SLOT_RING,
 	SLOT_MAIN_HAND,
-	SLOT_OFF_HAND,
+	SLOT_SPELL,
 	SLOT_POTION,
 	SLOT_FOOD
 }
@@ -29,45 +29,79 @@ enum KeyBind {
 
 const ITEMS = {
 	"slightly bent dagger": {
-		"icon": "res://Inventory/Sprites/Item_00.png",
+		"icon": "res://Inventory/Sprites/dagger.png",
 		"type": SlotType.SLOT_MAIN_HAND,
 		"stackable": false,
 		"stack_limit": 1,
 		"description": "It's sharp enough... I guess.",
 		"value": 10,
-		"click": null
+		"click": null,
+		"damage": 2,
+		"cooldown": .75,
+		"bonus": "power",
+		"bonus_amount": 1
 	},
-	"wand of striking": {
-		"icon": "res://Inventory/Sprites/Item_23.png",
-		"type": SlotType.SLOT_OFF_HAND,
+	"staff of striking": {
+		"icon": "res://Inventory/Sprites/staff.png",
+		"type": SlotType.SLOT_MAIN_HAND,
 		"stackable": false,
 		"stack_limit": 1,
 		"description": "Well, it's a fancy stick.",
 		"value": 10,
-		"click": null
+		"click": null,
+		"damage": 4,
+		"cooldown": 5,
+		"bonus": "spell_power",
+		"bonus_amount": 1
 	},
 	"one-half ring": {
-		"icon": "res://Inventory/Sprites/Item_40.png",
+		"icon": "res://Inventory/Sprites/ring.png",
 		"type": SlotType.SLOT_RING,
 		"stackable": false,
 		"stack_limit": 1,
 		"description": "A rather plain looking ring.",
 		"value": 10,
-		"click": null
+		"click": null,
+		"damage": null,
+		"cooldown": null,
+		"bonus": "health",
+		"bonus_amount": 5
 	},
 	"meat": {
-		"icon": "res://Inventory/Sprites/Item_58.png",
+		"icon": "res://Inventory/Sprites/meat.png",
 		"type": SlotType.SLOT_FOOD,
 		"stackable": true,
 		"stack_limit": 5,
 		"description": "Meat of unknown origin.",
 		"value": 10,
 		"click": [
-			"action_eat",
-			[]
-			]
+			"action_eat", {}
+			],
+		"damage": null,
+		"cooldown": 45.0,
+		"bonus": null,
+		"bonus_amount": null
+	},
+	"fireball": {
+		"icon": "res://Inventory/Sprites/spell.png",
+		"type": SlotType.SLOT_SPELL,
+		"stackable": false,
+		"stack_limit": 1,
+		"description": "Who doesn't like setting things on fire?",
+		"value": 10,
+		"click": [
+			"action_fireball", {
+				"duration": 0.5,
+				"damage": 6
+				}
+			],
+		"damage": null,
+		"cooldown": 4.0,
+		"bonus": null,
+		"bonus_amount": null
 	},
 }
+
 
 func get_item(item_id):
 	if item_id in ITEMS:
@@ -87,7 +121,7 @@ func get_type(slot_type):
 		4: description = "Feet"
 		5: description = "Ring"
 		6: description = "Main-Hand"
-		7: description = "Off-Hand"
+		7: description = "Spell"
 		8: description = "Potion"
 		9: description = "Food"
 

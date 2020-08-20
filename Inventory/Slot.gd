@@ -6,12 +6,16 @@ export(Inventory.KeyBind) var keyBind = null
 export(Color) var clickColor = Color(1, 1, 1, 1)
 
 var item = null
+var item_cooldown = 0
 var orig_color = Color(0, 0, 0, 0)
 
 onready var bag = get_tree().get_root().find_node("Bag", true, false)
 onready var keylabel = $KeyLabel
 onready var typelabel = $TypeLabel
 onready var stylebox = get_stylebox("panel")
+onready var cooldown = $CooldownTimer
+onready var progress = $ZIndexController/CooldownDisplay
+
 
 func _ready():
 # warning-ignore:return_value_discarded
@@ -39,6 +43,10 @@ func _process(_delta):
 		if slotType != Inventory.SlotType.SLOT_DEFAULT:
 			typelabel.visible = true
 
+	# Manage display of cooldown
+	if not cooldown.is_stopped():
+		progress.value = (cooldown.time_left / item_cooldown) * 100
+
 
 func _gui_input(event : InputEvent):
 	if event is InputEventMouseButton:
@@ -52,14 +60,50 @@ func _gui_input(event : InputEvent):
 func _unhandled_key_input(event):
 	if event.scancode == keyBind:
 		if event.pressed and not event.is_echo():
-				stylebox.border_color = clickColor
-				if item and item.has_action:
-					item.click()
+				var _ret = activate_item(true)
 		else:
 			stylebox.border_color = orig_color
 
 
+func activate_item(from_key = false) -> bool:
+	var result: bool = false
+
+	# Highlight border on action
+	stylebox.border_color = clickColor
+
+	# Call attached action if not in cooldown
+	if item and item.has_action and cooldown.is_stopped():
+		# Call item action
+		if item.click():
+			var _ret = activate_item_cooldown()
+
+		result = true
+
+	# Handle border color if this didn't come in via a key bind
+	if not from_key and stylebox.border_color == clickColor:
+		yield(get_tree().create_timer(0.2), "timeout")
+		stylebox.border_color = orig_color
+
+	return result
+
+
+func activate_item_cooldown() -> bool:
+	# If the cooldown timer is running then return false
+	if not cooldown.is_stopped():
+		return false
+
+	# If this item has a cooldown, trigger it
+	if item.action_cooldown > 0:
+		item_cooldown = item.action_cooldown
+		cooldown.start(item.action_cooldown)
+
+	return true
+
+
 func add_item(new_item):
+	# Make this yieldable
+	yield(get_tree(), "idle_frame")
+
 	# Return if this is the wrong slot type for the item
 	if not slotType == Inventory.SlotType.SLOT_DEFAULT and not slotType == new_item.type:
 		return false
@@ -83,6 +127,9 @@ func add_item(new_item):
 	# Reset position in case item was dragged to a new slot
 	item.rect_position = Vector2(1, 1)
 
+	if not slotType == Inventory.SlotType.SLOT_DEFAULT:
+		InventorySignals.emit_signal("item_equipped", self.item)
+
 	return true
 
 
@@ -95,6 +142,9 @@ func clear_slot():
 	for child in get_children():
 		if child is Item:
 			remove_child(child)
+
+	if not slotType == Inventory.SlotType.SLOT_DEFAULT:
+		InventorySignals.emit_signal("item_removed", old_item)
 
 	return old_item
 

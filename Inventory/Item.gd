@@ -15,21 +15,29 @@ class_name Item
 #		"stack_limit": 1,
 #		"description": "This is a well-worn apprentice's wand."
 #		"value": 10,
-#		"click": [ "shoot", [5, 1] ]
+#		"click": [ "shoot", [5, 1] ],
+#		"damage": 6,
+#		"cooldown": 20.0,
+#		"bonus": "spell_power",
+#		"bonus_amount": 1
 #	},
 
 # Define item variables
-var id: String = ""
-var icon: String = ""
-var type = null
-var type_description: String = ""
-var stackable: bool = false
-var stack_limit: int = 1
-var description: String = ""
-var value: int = 0
-var has_action: bool = false
-var action: String = ""
-var action_params: Array = []
+var id: String
+var icon: String
+var type
+var type_description: String
+var stackable: bool
+var stack_limit: int
+var description: String
+var value: int
+var has_action: bool
+var action: String
+var action_params: Dictionary = {}
+var action_cooldown: float
+var bonus: String
+var bonus_amount: int
+var damage: int
 
 # Define item manipulation variables
 var held: = false
@@ -41,6 +49,9 @@ onready var bag = get_tree().get_root().find_node("Bag", true, false)
 onready var equipment = get_tree().get_root().find_node("Equipment", true, false)
 onready var hotbar = get_tree().get_root().find_node("HotBar", true, false)
 onready var recycle = get_tree().get_root().find_node("Recycle", true, false)
+
+# Pointer to the Effects node for the world
+onready var effects = get_tree().get_root().find_node("Effects", true, false)
 
 
 func initialize(item_id):
@@ -61,6 +72,16 @@ func initialize(item_id):
 		has_action = true
 		action = temp_item["click"][0]
 		action_params = temp_item["click"][1]
+
+	if temp_item["cooldown"]:
+		action_cooldown = temp_item["cooldown"]
+
+	if temp_item["bonus"]:
+		bonus = temp_item["bonus"]
+		bonus_amount = temp_item["bonus_amount"]
+
+	if temp_item["damage"]:
+		damage = temp_item["damage"]
 
 
 func _process(_delta):
@@ -93,7 +114,7 @@ func _gui_input(event):
 				# Iterate over slots to find if any contain the mouse right now
 				for slot in get_tree().get_nodes_in_group("InventorySlot"):
 					if slot.get_global_rect().has_point(get_global_mouse_position()):
-						var slot_success = slot.add_item(self)
+						var slot_success = yield(slot.add_item(self), "completed")
 
 						if slot_success:
 							# Found new slot and moved item so exit input event before we return the item to the original slot
@@ -108,7 +129,7 @@ func _gui_input(event):
 
 				return_item()
 
-		elif  event.button_index == BUTTON_RIGHT:
+		elif event.button_index == BUTTON_RIGHT:
 			if owner.slotType != Inventory.SlotType.SLOT_DEFAULT:
 				var slot = bag.get_free_slot()
 				if slot:
@@ -128,14 +149,28 @@ func clear_item():
 	owner = null
 	return old_owner
 
-func click():
-	if has_action:
-		callv(action, action_params)
 
+func click() -> bool:
+	var result = false
+
+	if has_action:
+		result = call(action, action_params)
+
+	return result
 
 func return_item():
 	rect_global_position = orig_icon_pos
 
 
-func action_eat(_params = null):
+func action_eat(_params = null) -> bool:
 	print("Nom nom!")
+	queue_free()
+
+	return true
+
+
+func action_fireball(params = null) -> bool:
+	# Params = duration, damage
+	print("Cast Fireball: Gratuitous damage: ", params["damage"])
+
+	return true
