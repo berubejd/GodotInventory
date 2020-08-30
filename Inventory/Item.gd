@@ -130,12 +130,15 @@ func _gui_input(event):
 
 				# Check if dropped on recycle icon
 				if recycle.get_global_rect().has_point(get_global_mouse_position()):
+					# Calculate value of stack of items
+					var total_value = value * stack_size
+
 					# Display recycling message
-					var message = "Broke down " + id + " for " + str(value) + " gold!"
+					var message = "Broke down " + id + " for " + str(total_value) + " gold!"
 					print(message)
 
 					# Credit player for value
-					# gold += value
+					# gold += total_value
 
 					# Clean up after item
 					owner.clear_slot()
