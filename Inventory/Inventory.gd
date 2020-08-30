@@ -35,8 +35,8 @@ func pickup_item(item_id: String, count: int = 1, autoequip: bool = true, save: 
 	if autoequip and type != Inventory.SlotType.SLOT_DEFAULT:
 		for _slot in get_tree().get_nodes_in_group("InventorySlot"):
 			slot = _slot
-			if slot.slotType == type and not slot.item:
-				var result = yield(put_away_item(item_id, count, slot, announce), "completed")
+			if slot.slotType == type and (not slot.item or slot.item.stack_size < slot.item.stack_limit):
+				var result = yield(put_away_item(item_id, count, slot, save, announce), "completed")
 				# Item failed to be put in this selected slot
 				if result == INV_ERROR:
 					continue
@@ -54,7 +54,7 @@ func pickup_item(item_id: String, count: int = 1, autoequip: bool = true, save: 
 		slot = bag.get_free_slot(item_id)
 
 		if slot:
-			var result = yield(put_away_item(item_id, count, slot, announce), "completed")
+			var result = yield(put_away_item(item_id, count, slot, save, announce), "completed")
 
 			# Item put away
 			if result == 0:
@@ -66,8 +66,6 @@ func pickup_item(item_id: String, count: int = 1, autoequip: bool = true, save: 
 			else:
 				count = result
 
-			if save:
-				SaveGame.emit_signal("save_game")
 
 		else:
 			var value = Inventory.get_item(item_id)["value"]
@@ -77,22 +75,27 @@ func pickup_item(item_id: String, count: int = 1, autoequip: bool = true, save: 
 			var message = "Received " + str(value) + " gold for " + item_id + "!"
 			print(message)
 
+			SaveGame.emit_signal("save_game")
+
 			return false
 
 
 	return true
 
 
-func put_away_item(item_id, count, slot, announce):
+func put_away_item(item_id, count, slot, save, announce):
 	yield(get_tree(), "idle_frame")
 
 	var item_instance = item_preload.instance()
 
-	# Initialise the new item
+	# Initialize the new item
 	if not item_instance.initialize(item_id, count):
 		return INV_ERROR
 
 	count = yield(slot.add_item(item_instance), "completed")
+
+	if save:
+		SaveGame.emit_signal("save_game")
 
 	if announce:
 		var message = "Found " + item_id + "!"
@@ -106,14 +109,14 @@ func award_initial_inventory():
 	yield(pickup_item("slightly bent dagger", 1, true, false, false), "completed")
 	# This item would be autoequipped but there is an existing item equipped in that slot so goes to bag
 	yield(pickup_item("staff of striking", 1, true, false, false), "completed")
-	# This item should "announce" that it was piced up
+	# This item should "announce" that it was picked up
 	yield(pickup_item("one-half ring", 1, true, false, true), "completed")
 	# This item will not be autoloaded based on the parameters used
 	yield(pickup_item("fireball", 1, false, false, false), "completed")
 	# This should result in a stack of 5 meat equipped and a stack of 4 meat in the bag
+	yield(pickup_item("meat", 1, true, false, false), "completed")
 	yield(pickup_item("meat", 6, true, false, false), "completed")
-	yield(pickup_item("meat", 1, false, false, false), "completed")
-	yield(pickup_item("meat", 2, false, false, false), "completed")
+	yield(pickup_item("meat", 2, true, false, false), "completed")
 	
 	# Programmatically add an item to the "disabled" slot that can't be returned from slot once removed
 	var disabled_slot = find_node("Slot")
@@ -155,4 +158,4 @@ func load_state(data):
 		var new_item = data[slot_name]
 
 		if _slot:
-			put_away_item(new_item["id"], new_item["count"], _slot, false)
+			put_away_item(new_item["id"], new_item["count"], _slot, false, false)
