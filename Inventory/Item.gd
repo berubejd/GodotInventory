@@ -3,8 +3,6 @@ class_name Item
 
 ### TODO
 # Find solution for z ordering on drag?
-# Stackables
-# Money for recycled items?
 # Animated textures?
 
 # Inventory Item Example
@@ -29,6 +27,7 @@ var type
 var type_description: String
 var stackable: bool
 var stack_limit: int
+var stack_size: int setget update_stack
 var description: String
 var value: int
 var has_action: bool
@@ -44,6 +43,8 @@ var held: = false
 var offset: Vector2 = Vector2.ZERO
 var orig_icon_pos: Vector2 = Vector2.ZERO
 
+onready var count_label = $CountLabel
+
 # Pointers to various inventory areas
 onready var bag = get_tree().get_root().find_node("Bag", true, false)
 onready var equipment = get_tree().get_root().find_node("Equipment", true, false)
@@ -54,7 +55,7 @@ onready var recycle = get_tree().get_root().find_node("Recycle", true, false)
 onready var effects = get_tree().get_root().find_node("Effects", true, false)
 
 
-func initialize(item_id):
+func initialize(item_id, count: int = 1):
 	var temp_item = Inventory.get_item(item_id)
 
 	id = item_id
@@ -82,6 +83,13 @@ func initialize(item_id):
 
 	if temp_item["damage"]:
 		damage = temp_item["damage"]
+
+	if count > 0:
+		update_stack(count, false)
+		return true
+	else:
+		print("Invalid stack size for item ", id)
+		return false
 
 
 func _process(_delta):
@@ -116,13 +124,20 @@ func _gui_input(event):
 					if slot.get_global_rect().has_point(get_global_mouse_position()):
 						var slot_success = yield(slot.add_item(self), "completed")
 
-						if slot_success:
+						if slot_success == 0:
 							# Found new slot and moved item so exit input event before we return the item to the original slot
 							return
 
 				# Check if dropped on recycle icon
 				if recycle.get_global_rect().has_point(get_global_mouse_position()):
-					print("Poof!")
+					# Display recycling message
+					var message = "Broke down " + id + " for " + str(value) + " gold!"
+					print(message)
+
+					# Credit player for value
+					# gold += value
+
+					# Clean up after item
 					owner.clear_slot()
 					clear_item()
 					queue_free()
@@ -131,7 +146,7 @@ func _gui_input(event):
 
 		elif event.button_index == BUTTON_RIGHT:
 			if owner.slotType != Inventory.SlotType.SLOT_DEFAULT:
-				var slot = bag.get_free_slot()
+				var slot = bag.get_free_slot(self.id)
 				if slot:
 					slot.add_item(self)
 			elif not type == Inventory.SlotType.SLOT_DEFAULT:
@@ -150,6 +165,26 @@ func clear_item():
 	return old_owner
 
 
+func update_stack(new_count, enforce_limit = true):
+	# Shadowed since, at initialization, the onready variable has not yet been set
+	# warning-ignore:shadowed_variable
+	var count_label = $CountLabel
+
+	if enforce_limit:
+		# warning-ignore:narrowing_conversion
+		stack_size = min(new_count, stack_limit)
+	else:
+		stack_size = new_count
+
+	if stack_size > 1:
+		count_label.text = str(stack_size)
+		count_label.visible = true
+	elif stack_size <=0:
+		queue_free()
+	else:
+		count_label.visible = false
+
+
 func click() -> bool:
 	var result = false
 
@@ -158,13 +193,17 @@ func click() -> bool:
 
 	return result
 
+func reset_position():
+	rect_position = Vector2(1, 1)
+
+
 func return_item():
 	rect_global_position = orig_icon_pos
 
 
 func action_eat(_params = null) -> bool:
 	print("Nom nom!")
-	queue_free()
+	update_stack(stack_size - 1)
 
 	return true
 

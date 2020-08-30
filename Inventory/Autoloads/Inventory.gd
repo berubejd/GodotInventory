@@ -78,7 +78,7 @@ const ITEMS = {
 			"action_eat", {}
 			],
 		"damage": null,
-		"cooldown": 45.0,
+		"cooldown": 15.0,
 		"bonus": null,
 		"bonus_amount": null
 	},
