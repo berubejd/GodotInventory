@@ -114,6 +114,14 @@ func award_initial_inventory():
 	yield(pickup_item("meat", 6, true, false, false), "completed")
 	yield(pickup_item("meat", 1, false, false, false), "completed")
 	yield(pickup_item("meat", 2, false, false, false), "completed")
+	
+	# Programmatically add an item to the "disabled" slot that can't be returned from slot once removed
+	var disabled_slot = find_node("Slot")
+	var item_instance = item_preload.instance()
+	
+	item_instance.initialize("fireball", 1)
+	yield(disabled_slot.add_item(item_instance, true), "completed")
+
 	SaveGame.emit_signal("save_game")
 
 

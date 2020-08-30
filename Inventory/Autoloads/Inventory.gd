@@ -10,7 +10,8 @@ enum SlotType {
 	SLOT_MAIN_HAND,
 	SLOT_SPELL,
 	SLOT_POTION,
-	SLOT_FOOD
+	SLOT_FOOD,
+	SLOT_DISABLED
 }
 
 enum KeyBind {
@@ -34,7 +35,7 @@ const ITEMS = {
 		"stackable": false,
 		"stack_limit": 1,
 		"description": "It's sharp enough... I guess.",
-		"value": 10,
+		"value": 70,
 		"click": null,
 		"damage": 2,
 		"cooldown": .75,
@@ -47,7 +48,7 @@ const ITEMS = {
 		"stackable": false,
 		"stack_limit": 1,
 		"description": "Well, it's a fancy stick.",
-		"value": 10,
+		"value": 85,
 		"click": null,
 		"damage": 4,
 		"cooldown": 5,
@@ -60,7 +61,7 @@ const ITEMS = {
 		"stackable": false,
 		"stack_limit": 1,
 		"description": "A rather plain looking ring.",
-		"value": 10,
+		"value": 30,
 		"click": null,
 		"damage": null,
 		"cooldown": null,
@@ -73,7 +74,7 @@ const ITEMS = {
 		"stackable": true,
 		"stack_limit": 5,
 		"description": "Meat of unknown origin.",
-		"value": 10,
+		"value": 5,
 		"click": [
 			"action_eat", {}
 			],
@@ -88,7 +89,7 @@ const ITEMS = {
 		"stackable": false,
 		"stack_limit": 1,
 		"description": "Who doesn't like setting things on fire?",
-		"value": 10,
+		"value": 232,
 		"click": [
 			"action_fireball", {
 				"duration": 0.5,
@@ -124,5 +125,6 @@ func get_type(slot_type):
 		7: description = "Spell"
 		8: description = "Potion"
 		9: description = "Food"
+		10: description = ""
 
 	return description

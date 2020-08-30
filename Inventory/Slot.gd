@@ -37,6 +37,11 @@ func _ready():
 	# Save original border color
 	orig_color = stylebox.border_color
 
+	# Handle "disabled" slots
+	if slotType == Inventory.SlotType.SLOT_DISABLED:
+		self_modulate = Color(1.0, 1.0, 1.0, 0.6)
+		set_process_unhandled_key_input(false)
+
 
 func _process(_delta):
 	if item:
@@ -102,12 +107,12 @@ func activate_item_cooldown() -> bool:
 	return true
 
 
-func add_item(new_item) -> int:
+func add_item(new_item, override = false) -> int:
 	# Make this yieldable
 	yield(get_tree(), "idle_frame")
 
 	# Return if this is the wrong slot type for the item
-	if not slotType == Inventory.SlotType.SLOT_DEFAULT and not slotType == new_item.type:
+	if not override and not slotType == Inventory.SlotType.SLOT_DEFAULT and not slotType == new_item.type:
 		return INV_ERROR
 
 	# Return immediately if the item to be added is already in this slot
