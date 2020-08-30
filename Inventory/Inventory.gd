@@ -132,7 +132,10 @@ func save_state():
 
 	for _slot in get_tree().get_nodes_in_group("InventorySlot"):
 		if _slot.item:
-			data[_slot.name] = _slot.item.id
+			data[_slot.name] = {
+				"id": _slot.item.id,
+				"count": _slot.item.stack_size
+				}
 
 	return data
 
@@ -141,12 +144,7 @@ func load_state(data):
 	print("Loading ", name)
 	for slot_name in data.keys():
 		var _slot = find_node(slot_name)
+		var new_item = data[slot_name]
+
 		if _slot:
-			var item_instance = item_preload.instance()
-			item_instance.initialize(data[slot_name])
-
-			if _slot.item:
-				var old_item = _slot.clear_slot()
-				old_item.queue_free()
-
-			yield(_slot.add_item(item_instance), "completed")
+			put_away_item(new_item["id"], new_item["count"], _slot, false)
