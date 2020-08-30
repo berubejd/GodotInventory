@@ -83,7 +83,7 @@ func pickup_item(item_id: String, count: int = 1, autoequip: bool = true, save: 
 	return true
 
 
-func put_away_item(item_id, count, slot, save, announce):
+func put_away_item(item_id, count, slot, save, announce, override = false):
 	yield(get_tree(), "idle_frame")
 
 	var item_instance = item_preload.instance()
@@ -92,7 +92,7 @@ func put_away_item(item_id, count, slot, save, announce):
 	if not item_instance.initialize(item_id, count):
 		return INV_ERROR
 
-	count = yield(slot.add_item(item_instance), "completed")
+	count = yield(slot.add_item(item_instance, override), "completed")
 
 	if save:
 		SaveGame.emit_signal("save_game")
@@ -120,10 +120,7 @@ func award_initial_inventory():
 	
 	# Programmatically add an item to the "disabled" slot that can't be returned from slot once removed
 	var disabled_slot = find_node("Slot")
-	var item_instance = item_preload.instance()
-	
-	item_instance.initialize("fireball", 1)
-	yield(disabled_slot.add_item(item_instance, true), "completed")
+	yield(put_away_item("fireball", 1, disabled_slot, false, false, true), "completed")
 
 	SaveGame.emit_signal("save_game")
 
@@ -158,4 +155,8 @@ func load_state(data):
 		var new_item = data[slot_name]
 
 		if _slot:
-			put_away_item(new_item["id"], new_item["count"], _slot, false, false)
+			if _slot.item:
+				var old_item = _slot.clear_slot()
+				old_item.queue_free()
+
+			yield(put_away_item(new_item["id"], new_item["count"], _slot, false, false, true), "completed")

@@ -7,7 +7,7 @@ func _ready():
 	# Wait for scene tree has been built before trying to collet children
 	yield(get_tree(), "idle_frame")
 
-	# Create array of slots in bag - I don't think we use this?
+	# Create array of slots in bag
 	slots = self.get_children()
 
 
